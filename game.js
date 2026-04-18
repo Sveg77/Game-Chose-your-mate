@@ -1,85 +1,109 @@
 (function () {
   "use strict";
 
-  /** Лак, краска, UV, расчёска, фен, ножницы, зеркало, кисть — стилизованные «логотипы», не буквальные предметы */
-  /** @type {{ id: number; svg: string }[]} */
+  /** Узнаваемые силуэты в стиле логотипа + подписи для скринридеров */
+  /** @type {{ id: number; a11yName: string; svg: string }[]} */
   const PAIRS = [
     {
       id: 1,
+      a11yName: "лак для ногтей",
       svg:
         '<svg class="card__icon card__icon--line" viewBox="0 0 64 64" fill="none" aria-hidden="true">' +
-        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M22 40c2-14 10-22 20-20 6 1 10 8 9 16"/>' +
-        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M20 42c4 4 10 5 16 2"/>' +
-        '<circle cx="19" cy="43" r="2.2" fill="currentColor" stroke="none"/>' +
+        '<rect x="23" y="15" width="18" height="11" rx="3.5" stroke="currentColor" stroke-width="1.65"/>' +
+        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" d="M27 26v5h10v-5"/>' +
+        '<path stroke="currentColor" stroke-width="1.65" stroke-linejoin="round" d="M24 31h16v8a8 8 0 0 1-16 0v-8z"/>' +
+        '<path stroke="currentColor" stroke-width="1.35" stroke-linecap="round" opacity="0.45" d="M28 36h8"/>' +
         "</svg>",
     },
     {
       id: 2,
+      a11yName: "краска для волос, тюбик",
       svg:
         '<svg class="card__icon card__icon--line" viewBox="0 0 64 64" fill="none" aria-hidden="true">' +
-        '<circle cx="27" cy="32" r="9.5" stroke="currentColor" stroke-width="1.65" fill="none"/>' +
-        '<circle cx="37" cy="32" r="9.5" stroke="currentColor" stroke-width="1.65" fill="none"/>' +
-        '<path stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity="0.42" d="M23 42c5 3 13 3 18 0"/>' +
+        '<path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M20 26v12M22 24v16M24 22v20"/>' +
+        '<path stroke="currentColor" stroke-width="1.65" stroke-linejoin="round" d="M26 22l20 4 4 14-22 6-12-10 10-14z"/>' +
+        '<path stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity="0.5" d="M34 28l10 2"/>' +
         "</svg>",
     },
     {
       id: 3,
+      a11yName: "UV-лампа",
       svg:
         '<svg class="card__icon card__icon--line" viewBox="0 0 64 64" fill="none" aria-hidden="true">' +
-        '<path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M18 42a14 14 0 0 1 28 0"/>' +
-        '<path stroke="currentColor" stroke-width="1.35" stroke-linecap="round" opacity="0.45" d="M22 34v6M28 30v10M32 28v12M36 30v10M42 34v6"/>' +
-        '<circle cx="22" cy="26" r="1.35" fill="currentColor"/><circle cx="28" cy="22" r="1.35" fill="currentColor"/>' +
-        '<circle cx="32" cy="20" r="1.35" fill="currentColor"/><circle cx="36" cy="22" r="1.35" fill="currentColor"/>' +
-        '<circle cx="42" cy="26" r="1.35" fill="currentColor"/>' +
+        '<path stroke="currentColor" stroke-width="1.65" stroke-linejoin="round" d="M16 46h32v6H16z"/>' +
+        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M16 46Q32 14 48 46"/>' +
+        '<circle cx="24" cy="38" r="1.8" fill="currentColor"/><circle cx="30" cy="32" r="1.8" fill="currentColor"/>' +
+        '<circle cx="32" cy="28" r="1.8" fill="currentColor"/><circle cx="34" cy="32" r="1.8" fill="currentColor"/>' +
+        '<circle cx="40" cy="38" r="1.8" fill="currentColor"/>' +
         "</svg>",
     },
     {
       id: 4,
+      a11yName: "расчёска",
       svg:
         '<svg class="card__icon card__icon--line" viewBox="0 0 64 64" fill="none" aria-hidden="true">' +
-        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M21 24h22"/>' +
-        '<path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M23 24v17M27 24v17M31 24v17M35 24v17M39 24v17"/>' +
-        '<path stroke="currentColor" stroke-width="1.35" stroke-linecap="round" opacity="0.38" d="M20 41h24"/>' +
+        '<rect x="18" y="22" width="10" height="20" rx="2" stroke="currentColor" stroke-width="1.65"/>' +
+        '<path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M28 24h18M28 29h20M28 34h20M28 39h20M28 44h18"/>' +
         "</svg>",
     },
     {
       id: 5,
+      a11yName: "фен",
       svg:
         '<svg class="card__icon card__icon--line" viewBox="0 0 64 64" fill="none" aria-hidden="true">' +
-        '<circle cx="26" cy="32" r="11" stroke="currentColor" stroke-width="1.65"/>' +
-        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M40 24c9 3 9 13 0 16"/>' +
-        '<path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.5" d="M42 28l10-3M42 32h12M42 36l10 3"/>' +
+        '<circle cx="27" cy="31" r="10.5" stroke="currentColor" stroke-width="1.65"/>' +
+        '<rect x="37.5" y="25" width="14.5" height="12" rx="2.5" stroke="currentColor" stroke-width="1.65"/>' +
+        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M24 40Q20 48 22 52"/>' +
+        '<path stroke="currentColor" stroke-width="1.35" stroke-linecap="round" opacity="0.45" d="M46 30h6M46 33h8M46 36h6"/>' +
         "</svg>",
     },
     {
       id: 6,
+      a11yName: "парикмахерские ножницы",
       svg:
         '<svg class="card__icon card__icon--line" viewBox="0 0 64 64" fill="none" aria-hidden="true">' +
-        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M26 20L38 44M38 20L26 44"/>' +
-        '<circle cx="32" cy="32" r="3.5" stroke="currentColor" stroke-width="1.5"/>' +
+        '<circle cx="23" cy="44" r="5.5" stroke="currentColor" stroke-width="1.65"/>' +
+        '<circle cx="41" cy="44" r="5.5" stroke="currentColor" stroke-width="1.65"/>' +
+        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M23 40L33 22M41 40L31 22"/>' +
+        '<circle cx="32" cy="21" r="2.8" stroke="currentColor" stroke-width="1.5"/>' +
         "</svg>",
     },
     {
       id: 7,
+      a11yName: "ручное зеркало",
       svg:
         '<svg class="card__icon card__icon--line" viewBox="0 0 64 64" fill="none" aria-hidden="true">' +
-        '<ellipse cx="32" cy="32" rx="15" ry="19" stroke="currentColor" stroke-width="1.5"/>' +
-        '<ellipse cx="32" cy="32" rx="10" ry="13" stroke="currentColor" stroke-width="1.35" opacity="0.5"/>' +
-        '<path stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.35" d="M28 30h8M30 34h4"/>' +
+        '<ellipse cx="32" cy="26" rx="13" ry="17" stroke="currentColor" stroke-width="1.65"/>' +
+        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M32 43v14"/>' +
+        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M27 57h10"/>' +
+        '<ellipse cx="32" cy="26" rx="9" ry="12" stroke="currentColor" stroke-width="1.35" opacity="0.45"/>' +
         "</svg>",
     },
     {
       id: 8,
+      a11yName: "кисть для макияжа",
       svg:
         '<svg class="card__icon card__icon--line" viewBox="0 0 64 64" fill="none" aria-hidden="true">' +
-        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M32 46L22 28"/>' +
-        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M32 46L42 28"/>' +
-        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M32 46L32 26"/>' +
-        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M26 22h12"/>' +
-        '<path stroke="currentColor" stroke-width="1.35" stroke-linecap="round" opacity="0.45" d="M24 32h16"/>' +
+        '<path stroke="currentColor" stroke-width="1.65" stroke-linejoin="round" d="M24 20h16l-8 14-8-14z"/>' +
+        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M26 18h12"/>' +
+        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M32 34v22"/>' +
+        '<path stroke="currentColor" stroke-width="1.65" stroke-linecap="round" d="M27 56h10"/>' +
+        '<path stroke="currentColor" stroke-width="1.35" stroke-linecap="round" opacity="0.4" d="M28 24l4 8 4-8"/>' +
         "</svg>",
     },
   ];
+
+  function labelClosed() {
+    return "Закрытая карточка";
+  }
+
+  function labelOpen(name) {
+    return 'Открыта: знак «' + name + '». Найдите такую же карточку.';
+  }
+
+  function labelMatched(name) {
+    return 'Пара собрана: «' + name + '».';
+  }
 
   const monogramMark = `<svg class="card__monogram" viewBox="0 0 64 64" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.2" d="M32 18v28M22 26l10 6 10-6M22 38l10-6 10 6"/></svg>`;
 
@@ -154,8 +178,9 @@
   function buildDeck() {
     const deck = [];
     PAIRS.forEach(function (p) {
-      deck.push({ pairId: p.id, svg: p.svg });
-      deck.push({ pairId: p.id, svg: p.svg });
+      const card = { pairId: p.id, svg: p.svg, a11yName: p.a11yName };
+      deck.push(card);
+      deck.push({ pairId: card.pairId, svg: card.svg, a11yName: card.a11yName });
     });
     return shuffle(deck);
   }
@@ -167,7 +192,7 @@
       btn.type = "button";
       btn.className = "card";
       btn.dataset.index = String(index);
-      btn.setAttribute("aria-label", "Закрытая карточка");
+      btn.setAttribute("aria-label", labelClosed());
       btn.innerHTML =
         '<span class="card__inner">' +
         '<span class="card__face card__face--back">' +
@@ -190,8 +215,8 @@
     }
     startTimer();
     btn.classList.add("is-flipped");
-    btn.setAttribute("aria-label", "Открытая карточка");
-    flipped.push({ index: index, el: btn, pairId: cards[index].pairId });
+    btn.setAttribute("aria-label", labelOpen(cards[index].a11yName));
+    flipped.push({ index: index, el: btn, pairId: cards[index].pairId, a11yName: cards[index].a11yName });
 
     if (flipped.length < 2) return;
 
@@ -203,11 +228,12 @@
     const b = flipped[1];
 
     if (a.pairId === b.pairId) {
+      const matchedName = a.a11yName;
       window.setTimeout(function () {
         a.el.classList.add("is-matched");
         b.el.classList.add("is-matched");
-        a.el.setAttribute("aria-label", "Найденная пара");
-        b.el.setAttribute("aria-label", "Найденная пара");
+        a.el.setAttribute("aria-label", labelMatched(matchedName));
+        b.el.setAttribute("aria-label", labelMatched(matchedName));
         flipped = [];
         lock = false;
         matched += 1;
@@ -220,8 +246,8 @@
       window.setTimeout(function () {
         a.el.classList.remove("is-flipped");
         b.el.classList.remove("is-flipped");
-        a.el.setAttribute("aria-label", "Закрытая карточка");
-        b.el.setAttribute("aria-label", "Закрытая карточка");
+        a.el.setAttribute("aria-label", labelClosed());
+        b.el.setAttribute("aria-label", labelClosed());
         flipped = [];
         lock = false;
       }, 700);
