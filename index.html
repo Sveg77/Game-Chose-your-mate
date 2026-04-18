@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Найди пару — игра для гостей салона красоты" />
+  <title>Найди пару — игра для гостей салона</title>
+  <meta name="theme-color" content="#f3efe8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app" id="salon-memory-game">
+    <header class="app__header">
+      <div class="brand">
+        <span class="brand__mark" aria-hidden="true"></span>
+        <div class="brand__text">
+          <p class="brand__eyebrow">Игра для гостей</p>
+          <h1 class="brand__title">Найди пару</h1>
+        </div>
+      </div>
+      <div class="stats" role="status" aria-live="polite">
+        <div class="stat">
+          <span class="stat__label">Время</span>
+          <span class="stat__value" id="timer">0:00</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">Ходы</span>
+          <span class="stat__value" id="moves">0</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="app__main">
+      <p class="hint" id="hint">Переворачивайте карточки и соберите все пары.</p>
+      <div class="board" id="board" aria-label="Игровое поле карточек"></div>
+    </main>
+
+    <footer class="app__footer">
+      <button type="button" class="btn btn--ghost" id="btn-restart">Новая игра</button>
+    </footer>
+  </div>
+
+  <div class="modal" id="win-modal" hidden aria-hidden="true">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="win-title">
+      <p class="modal__eyebrow">Поздравляем</p>
+      <h2 class="modal__title" id="win-title">Все пары найдены</h2>
+      <p class="modal__lead">Вы прошли игру с изяществом, достойным нашего салона.</p>
+      <dl class="modal__stats">
+        <div>
+          <dt>Время</dt>
+          <dd id="win-time">—</dd>
+        </div>
+        <div>
+          <dt>Ходы</dt>
+          <dd id="win-moves">—</dd>
+        </div>
+      </dl>
+      <button type="button" class="btn btn--primary" id="btn-play-again">Играть снова</button>
+    </div>
+  </div>
+
+  <script src="game.js" defer></script>
+</body>
+</html>
