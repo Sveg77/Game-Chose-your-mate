@@ -21,7 +21,11 @@
           <h1 class="brand__title">Найди пару</h1>
         </div>
       </div>
-      <div class="stats" role="status" aria-live="polite">
+      <div class="stats stats--wide" role="status" aria-live="polite">
+        <div class="stat">
+          <span class="stat__label">Уровень</span>
+          <span class="stat__value" id="level-num">1</span>
+        </div>
         <div class="stat">
           <span class="stat__label">Время</span>
           <span class="stat__value" id="timer">0:00</span>
@@ -30,26 +34,66 @@
           <span class="stat__label">Ходы</span>
           <span class="stat__value" id="moves">0</span>
         </div>
+        <div class="stat stat--score" id="stat-score-wrap" hidden>
+          <span class="stat__label">Баллы</span>
+          <span class="stat__value" id="score-total">0</span>
+        </div>
       </div>
     </header>
 
+    <div class="mode-bar" role="group" aria-label="Режим игры">
+      <span class="mode-bar__label">Режим</span>
+      <div class="mode-bar__btns">
+        <button type="button" class="btn-mode is-active" id="mode-solo" aria-pressed="true">Один</button>
+        <button type="button" class="btn-mode" id="mode-bot" aria-pressed="false">С ботом</button>
+      </div>
+    </div>
+
+    <div class="bot-hud" id="bot-hud" hidden>
+      <div class="bot-hud__you"><span class="bot-hud__k">Вы</span> <span class="bot-hud__v" id="score-human-pairs">0</span> пар</div>
+      <div class="bot-hud__sep" aria-hidden="true"></div>
+      <div class="bot-hud__bot"><span class="bot-hud__k">Бот</span> <span class="bot-hud__v" id="score-bot-pairs">0</span> пар</div>
+      <p class="bot-hud__turn" id="turn-hint" aria-live="polite"></p>
+    </div>
+
+    <div class="time-bar" id="time-bar" hidden>
+      <div class="time-bar__row">
+        <span class="time-bar__label">Лимит времени</span>
+        <span class="time-bar__value" id="countdown-display">—</span>
+      </div>
+      <div class="time-bar__track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="time-bar-progress" aria-label="Оставшееся время">
+        <div class="time-bar__fill" id="time-bar-fill"></div>
+      </div>
+    </div>
+
     <main class="app__main">
       <p class="hint" id="hint">Переворачивайте карточки и соберите все пары.</p>
-      <div class="board" id="board" aria-label="Игровое поле карточек"></div>
+      <details class="difficulty-details" id="difficulty-details" hidden>
+        <summary>С 6-го уровня игра усложняется</summary>
+        <ul class="difficulty-details__list">
+          <li>появляется лимит времени и шкала прогресса;</li>
+          <li>с каждым уровнем времени на партию меньше;</li>
+          <li>ошибка (две разные карты) отнимает баллы;</li>
+          <li>несовпадение закрывается чуть быстрее — меньше времени «запомнить»;</li>
+          <li>за остаток времени и за пары начисляются бонусные баллы;</li>
+          <li>впереди можно добавить: «туман» после ошибки, бонус за серию без промахов, узкий набор карт.</li>
+        </ul>
+      </details>
+      <div class="board" id="board" data-cols="4" aria-label="Игровое поле карточек"></div>
     </main>
 
     <footer class="app__footer">
-      <button type="button" class="btn btn--ghost" id="btn-restart">Новая игра</button>
+      <button type="button" class="btn btn--ghost" id="btn-restart">С уровня 1</button>
     </footer>
   </div>
 
   <div class="modal" id="win-modal" hidden aria-hidden="true">
     <div class="modal__backdrop" data-close></div>
     <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="win-title">
-      <p class="modal__eyebrow">Поздравляем</p>
-      <h2 class="modal__title" id="win-title">Все пары найдены</h2>
-      <p class="modal__lead">Каждая найденная пара — маленькая победа над хаосом: вы шли спокойно, внимательно и довели всё до сияющего финала. Пусть это чувство ясности и уверенности останется с вами.</p>
-      <dl class="modal__stats">
+      <p class="modal__eyebrow" id="win-eyebrow">Поздравляем</p>
+      <h2 class="modal__title" id="win-title">Уровень пройден</h2>
+      <p class="modal__lead" id="win-lead">Каждая найденная пара — маленькая победа над хаосом: вы шли спокойно, внимательно и довели всё до сияющего финала. Пусть это чувство ясности и уверенности останется с вами.</p>
+      <dl class="modal__stats" id="win-stats">
         <div>
           <dt>Время</dt>
           <dd id="win-time">—</dd>
@@ -58,8 +102,28 @@
           <dt>Ходы</dt>
           <dd id="win-moves">—</dd>
         </div>
+        <div id="win-stat-score-row" hidden>
+          <dt>Баллы (всего)</dt>
+          <dd id="win-score">—</dd>
+        </div>
       </dl>
-      <button type="button" class="btn btn--primary" id="btn-play-again">Играть снова</button>
+      <div class="modal__actions">
+        <button type="button" class="btn btn--primary" id="btn-next-level">Следующий уровень</button>
+        <button type="button" class="btn btn--ghost" id="btn-play-again">С уровня 1</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="timeout-modal" hidden aria-hidden="true">
+    <div class="modal__backdrop" data-timeout-close></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="timeout-title">
+      <p class="modal__eyebrow">Время</p>
+      <h2 class="modal__title" id="timeout-title">Лимит исчерпан</h2>
+      <p class="modal__lead">Попробуйте ещё раз на этом уровне или начните с первого.</p>
+      <div class="modal__actions">
+        <button type="button" class="btn btn--primary" id="btn-retry-level">Повторить уровень</button>
+        <button type="button" class="btn btn--ghost" id="btn-timeout-home">С уровня 1</button>
+      </div>
     </div>
   </div>
 
