@@ -79,11 +79,18 @@
           <li>впереди можно добавить: «туман» после ошибки, бонус за серию без промахов, узкий набор карт.</li>
         </ul>
       </details>
-      <div class="board" id="board" data-cols="4" aria-label="Игровое поле карточек"></div>
+      <div class="board-wrap" id="board-wrap">
+        <div class="board-scale" id="board-scale">
+          <div class="board" id="board" data-cols="4" aria-label="Игровое поле карточек"></div>
+        </div>
+      </div>
     </main>
 
     <footer class="app__footer">
-      <button type="button" class="btn btn--ghost" id="btn-restart">С уровня 1</button>
+      <button type="button" class="btn btn--ghost btn--footer" id="btn-restart-level" aria-label="Перезапустить текущий уровень с новой раскладкой карт">
+        Начать Уровень <span id="footer-level-num">1</span> заново
+      </button>
+      <button type="button" class="btn btn--primary btn--footer" id="btn-restart">Начать с Уровня 1</button>
     </footer>
   </div>
 
@@ -109,7 +116,7 @@
       </dl>
       <div class="modal__actions">
         <button type="button" class="btn btn--primary" id="btn-next-level">Следующий уровень</button>
-        <button type="button" class="btn btn--ghost" id="btn-play-again">С уровня 1</button>
+        <button type="button" class="btn btn--ghost" id="btn-play-again">Начать с Уровня 1</button>
       </div>
     </div>
   </div>
@@ -122,7 +129,7 @@
       <p class="modal__lead">Попробуйте ещё раз на этом уровне или начните с первого.</p>
       <div class="modal__actions">
         <button type="button" class="btn btn--primary" id="btn-retry-level">Повторить уровень</button>
-        <button type="button" class="btn btn--ghost" id="btn-timeout-home">С уровня 1</button>
+        <button type="button" class="btn btn--ghost" id="btn-timeout-home">Начать с Уровня 1</button>
       </div>
     </div>
   </div>

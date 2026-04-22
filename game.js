@@ -173,13 +173,9 @@
     return Math.floor(Math.random() * (b - a + 1)) + a;
   }
 
-  function wait(ms) {
-    return new Promise(function (resolve) {
-      window.setTimeout(resolve, ms);
-    });
-  }
-
   const board = document.getElementById("board");
+  const boardWrap = document.getElementById("board-wrap");
+  const boardScale = document.getElementById("board-scale");
   const timerEl = document.getElementById("timer");
   const movesEl = document.getElementById("moves");
   const hintEl = document.getElementById("hint");
@@ -191,6 +187,8 @@
   const timeBarFill = document.getElementById("time-bar-fill");
   const timeBarProgress = document.getElementById("time-bar-progress");
   const btnRestart = document.getElementById("btn-restart");
+  const btnRestartLevel = document.getElementById("btn-restart-level");
+  const footerLevelNum = document.getElementById("footer-level-num");
   const winModal = document.getElementById("win-modal");
   const winTitle = document.getElementById("win-title");
   const winEyebrow = document.getElementById("win-eyebrow");
@@ -234,6 +232,44 @@
   let botMemory = new Map();
   let botBusy = false;
   let gameOver = false;
+  let boardFitTimer = null;
+
+  function scheduleAdjustBoardFit() {
+    if (boardFitTimer !== null) {
+      clearTimeout(boardFitTimer);
+    }
+    boardFitTimer = window.setTimeout(function () {
+      boardFitTimer = null;
+      adjustBoardFit();
+    }, 50);
+  }
+
+  function adjustBoardFit() {
+    if (!boardWrap || !boardScale || !board) {
+      return;
+    }
+    boardScale.style.transform = "";
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(function () {
+        if (!boardWrap || !boardScale || !board) {
+          return;
+        }
+        var mw = boardWrap.clientWidth;
+        var mh = boardWrap.clientHeight;
+        if (mh < 40 || mw < 40) {
+          return;
+        }
+        var w = board.offsetWidth || 1;
+        var h = board.offsetHeight || 1;
+        var s = Math.min(1, (mw * 0.97) / w, (mh * 0.97) / h);
+        if (s < 0.24) {
+          s = 0.24;
+        }
+        boardScale.style.transformOrigin = "top center";
+        boardScale.style.transform = "scale(" + s + ")";
+      });
+    });
+  }
 
   function stopTimer() {
     if (timerId !== null) {
@@ -263,26 +299,29 @@
   }
 
   function updateLevelUi() {
-    levelNumEl.textContent = String(level);
+    if (levelNumEl) levelNumEl.textContent = String(level);
+    if (footerLevelNum) footerLevelNum.textContent = String(level);
     const lim = timeLimitForLevel(level);
     if (lim !== null) {
-      timeBar.hidden = false;
-      statScoreWrap.hidden = false;
-      difficultyDetails.hidden = false;
+      if (timeBar) timeBar.hidden = false;
+      if (statScoreWrap) statScoreWrap.hidden = false;
+      if (difficultyDetails) difficultyDetails.hidden = false;
     } else {
-      timeBar.hidden = true;
-      statScoreWrap.hidden = true;
-      difficultyDetails.hidden = true;
+      if (timeBar) timeBar.hidden = true;
+      if (statScoreWrap) statScoreWrap.hidden = true;
+      if (difficultyDetails) difficultyDetails.hidden = true;
     }
-    scoreTotalEl.textContent = String(totalScore);
+    if (scoreTotalEl) scoreTotalEl.textContent = String(totalScore);
   }
 
   function setProgressBar() {
-    if (timeMax <= 0) return;
+    if (timeMax <= 0 || !timeBarFill || !countdownDisplay) return;
     const pct = Math.max(0, Math.min(100, (timeLeft / timeMax) * 100));
     timeBarFill.style.width = pct + "%";
     countdownDisplay.textContent = formatTime(timeLeft);
-    timeBarProgress.setAttribute("aria-valuenow", String(Math.round(pct)));
+    if (timeBarProgress) {
+      timeBarProgress.setAttribute("aria-valuenow", String(Math.round(pct)));
+    }
   }
 
   function startCountdown() {
@@ -306,11 +345,13 @@
   }
 
   function closeWinModal() {
+    if (!winModal) return;
     winModal.hidden = true;
     winModal.setAttribute("aria-hidden", "true");
   }
 
   function closeTimeoutModal() {
+    if (!timeoutModal) return;
     timeoutModal.hidden = true;
     timeoutModal.setAttribute("aria-hidden", "true");
   }
@@ -320,14 +361,24 @@
     stopCountdown();
     gameOver = true;
     lock = true;
+    if (!board) {
+      if (timeoutModal) {
+        timeoutModal.hidden = false;
+        timeoutModal.setAttribute("aria-hidden", "false");
+      }
+      if (btnRetryLevel) btnRetryLevel.focus();
+      return;
+    }
     board.querySelectorAll(".card.is-flipped:not(.is-matched)").forEach(function (el) {
       el.classList.remove("is-flipped");
       el.setAttribute("aria-label", labelClosed());
     });
     flipped = [];
-    timeoutModal.hidden = false;
-    timeoutModal.setAttribute("aria-hidden", "false");
-    btnRetryLevel.focus();
+    if (timeoutModal) {
+      timeoutModal.hidden = false;
+      timeoutModal.setAttribute("aria-hidden", "false");
+    }
+    if (btnRetryLevel) btnRetryLevel.focus();
   }
 
   function buildDeck(pairCount) {
@@ -349,6 +400,7 @@
   }
 
   function getCardEl(i) {
+    if (!board) return null;
     return board.querySelector('[data-index="' + i + '"]');
   }
 
@@ -441,6 +493,9 @@
   }
 
   function renderBoard() {
+    if (!board) {
+      return;
+    }
     board.innerHTML = "";
     const n = cards.length;
     board.dataset.cols = String(gridColsForCount(n));
@@ -462,6 +517,7 @@
       btn.addEventListener("click", onCardClick);
       board.appendChild(btn);
     });
+    scheduleAdjustBoardFit();
   }
 
   function applyScoreForMatch() {
@@ -471,7 +527,7 @@
     const add = Math.round(55 * mul);
     levelRoundScore += add;
     totalScore += add;
-    scoreTotalEl.textContent = String(totalScore);
+    if (scoreTotalEl) scoreTotalEl.textContent = String(totalScore);
   }
 
   function applyScoreForMiss() {
@@ -480,7 +536,7 @@
     const pen = Math.round(6 + (level - 6) * 1.2);
     levelRoundScore -= pen;
     totalScore = Math.max(0, totalScore - pen);
-    scoreTotalEl.textContent = String(totalScore);
+    if (scoreTotalEl) scoreTotalEl.textContent = String(totalScore);
   }
 
   function applyTimeBonus() {
@@ -497,10 +553,11 @@
     }
     levelRoundScore += bonus;
     totalScore += bonus;
-    scoreTotalEl.textContent = String(totalScore);
+    if (scoreTotalEl) scoreTotalEl.textContent = String(totalScore);
   }
 
   function endLevelSuccess() {
+    if (!winModal) return;
     stopTimer();
     stopCountdown();
     gameOver = true;
@@ -526,15 +583,17 @@
     }
     winTime.textContent = formatTime(seconds);
     winMoves.textContent = String(moves);
-    if (level >= 6) {
-      winScoreRow.hidden = false;
-      winScore.textContent = String(totalScore);
-    } else {
-      winScoreRow.hidden = true;
+    if (winScoreRow) {
+      if (level >= 6) {
+        winScoreRow.hidden = false;
+        if (winScore) winScore.textContent = String(totalScore);
+      } else {
+        winScoreRow.hidden = true;
+      }
     }
     winModal.hidden = false;
     winModal.setAttribute("aria-hidden", "false");
-    btnNextLevel.focus();
+    if (btnNextLevel) btnNextLevel.focus();
   }
 
   function onTimeUp() {
@@ -589,13 +648,7 @@
         matched += 1;
         applyScoreForMatch();
         grantPairToCurrentPlayer();
-        const pairsDone = matched >= pairsForLevel(level);
         checkBoardComplete();
-        if (!pairsDone && gameMode === "bot" && currentPlayer === "bot") {
-          window.setTimeout(function () {
-            runBotTurn();
-          }, randInt(500, 1100));
-        }
       }, 380);
     } else {
       applyScoreForMiss();
@@ -644,29 +697,83 @@
     return true;
   }
 
-  async function runBotTurn() {
-    if (gameOver || gameMode !== "bot" || currentPlayer !== "bot" || botBusy) return;
+  function runBotTurn() {
+    if (gameOver || gameMode !== "bot" || currentPlayer !== "bot" || botBusy) {
+      return;
+    }
     botBusy = true;
-    try {
-      while (currentPlayer === "bot" && !gameOver) {
-        const avail = availableIndices();
-        if (avail.length < 2) break;
-        await wait(randInt(380, 820));
-        const i1 = botPickFirstIndex();
-        if (i1 < 0) break;
-        tryRevealCard(i1, "bot");
-        await wait(randInt(280, 620));
-        const i2 = botPickSecondIndex(i1, cards[i1].pairId);
-        if (i2 < 0) break;
-        tryRevealCard(i2, "bot");
-        while (lock && !gameOver) {
-          await wait(120);
-        }
-        if (currentPlayer !== "bot") break;
-      }
-    } finally {
+
+    function finishBot() {
       botBusy = false;
     }
+
+    function waitUnlock(done, safety) {
+      var n = safety || 0;
+      if (n > 200) {
+        finishBot();
+        return;
+      }
+      if (gameOver) {
+        finishBot();
+        return;
+      }
+      if (!lock) {
+        done();
+        return;
+      }
+      window.setTimeout(function () {
+        waitUnlock(done, n + 1);
+      }, 100);
+    }
+
+    function botPlayOneTry() {
+      if (gameOver || currentPlayer !== "bot") {
+        finishBot();
+        return;
+      }
+      var avail = availableIndices();
+      if (avail.length < 2) {
+        finishBot();
+        return;
+      }
+      window.setTimeout(function () {
+        if (gameOver || currentPlayer !== "bot") {
+          finishBot();
+          return;
+        }
+        var i1 = botPickFirstIndex();
+        if (i1 < 0) {
+          finishBot();
+          return;
+        }
+        tryRevealCard(i1, "bot");
+        window.setTimeout(function () {
+          if (gameOver || currentPlayer !== "bot") {
+            finishBot();
+            return;
+          }
+          var i2 = botPickSecondIndex(i1, cards[i1].pairId);
+          if (i2 < 0) {
+            finishBot();
+            return;
+          }
+          tryRevealCard(i2, "bot");
+          waitUnlock(function () {
+            if (gameOver) {
+              finishBot();
+              return;
+            }
+            if (currentPlayer === "bot") {
+              window.setTimeout(botPlayOneTry, randInt(400, 1050));
+            } else {
+              finishBot();
+            }
+          });
+        }, randInt(280, 620));
+      }, randInt(380, 820));
+    }
+
+    botPlayOneTry();
   }
 
   function onCardClick(ev) {
@@ -678,6 +785,9 @@
   }
 
   function initLevel(keepScore) {
+    if (!board || !timerEl || !movesEl || !levelNumEl || !hintEl) {
+      return;
+    }
     stopTimer();
     stopCountdown();
     gameOver = false;
@@ -713,6 +823,13 @@
     if (lim !== null) {
       startCountdown();
     }
+    scheduleAdjustBoardFit();
+  }
+
+  function restartCurrentLevelOnly() {
+    closeWinModal();
+    closeTimeoutModal();
+    initLevel(true);
   }
 
   function goNextLevel() {
@@ -731,32 +848,46 @@
     initLevel(true);
   }
 
-  btnRestart.addEventListener("click", resetToLevelOne);
-  btnPlayAgain.addEventListener("click", resetToLevelOne);
-  btnNextLevel.addEventListener("click", goNextLevel);
+  if (btnRestart) btnRestart.addEventListener("click", resetToLevelOne);
+  if (btnRestartLevel) btnRestartLevel.addEventListener("click", restartCurrentLevelOnly);
+  if (btnPlayAgain) btnPlayAgain.addEventListener("click", resetToLevelOne);
+  if (btnNextLevel) btnNextLevel.addEventListener("click", goNextLevel);
 
-  btnRetryLevel.addEventListener("click", retryCurrentLevel);
-  btnTimeoutHome.addEventListener("click", function () {
-    closeTimeoutModal();
-    resetToLevelOne();
-  });
-
-  winModal.addEventListener("click", function (ev) {
-    if (ev.target && ev.target.getAttribute("data-close") !== null) {
-      closeWinModal();
-    }
-  });
-
-  timeoutModal.addEventListener("click", function (ev) {
-    if (ev.target && ev.target.getAttribute("data-timeout-close") !== null) {
+  if (btnRetryLevel) btnRetryLevel.addEventListener("click", retryCurrentLevel);
+  if (btnTimeoutHome)
+    btnTimeoutHome.addEventListener("click", function () {
       closeTimeoutModal();
-    }
-  });
+      resetToLevelOne();
+    });
+
+  window.addEventListener("resize", scheduleAdjustBoardFit);
+  window.addEventListener("orientationchange", scheduleAdjustBoardFit);
+  if (typeof ResizeObserver !== "undefined" && boardWrap) {
+    var boardFitObserver = new ResizeObserver(scheduleAdjustBoardFit);
+    boardFitObserver.observe(boardWrap);
+  }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", scheduleAdjustBoardFit);
+  }
+
+  if (winModal)
+    winModal.addEventListener("click", function (ev) {
+      if (ev.target && ev.target.getAttribute("data-close") !== null) {
+        closeWinModal();
+      }
+    });
+
+  if (timeoutModal)
+    timeoutModal.addEventListener("click", function (ev) {
+      if (ev.target && ev.target.getAttribute("data-timeout-close") !== null) {
+        closeTimeoutModal();
+      }
+    });
 
   document.addEventListener("keydown", function (ev) {
     if (ev.key === "Escape") {
-      if (!winModal.hidden) closeWinModal();
-      if (!timeoutModal.hidden) closeTimeoutModal();
+      if (winModal && !winModal.hidden) closeWinModal();
+      if (timeoutModal && !timeoutModal.hidden) closeTimeoutModal();
     }
   });
 
@@ -776,6 +907,10 @@
   modeBot.addEventListener("click", function () {
     setMode("bot");
   });
+
+  if (difficultyDetails) {
+    difficultyDetails.addEventListener("toggle", scheduleAdjustBoardFit);
+  }
 
   initLevel(false);
 })();
