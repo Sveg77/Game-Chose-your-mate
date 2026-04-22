@@ -370,7 +370,7 @@
       board.classList.remove("board--bot-turn");
       board.classList.remove("board--blocked");
     } else {
-      turnHintEl.textContent = "Ход бота…";
+      turnHintEl.textContent = "Ход партнера…";
       board.classList.add("board--bot-turn", "board--blocked");
     }
   }
@@ -517,11 +517,11 @@
       if (humanPairs > botPairs) {
         msg = "У вас больше пар — отличная игра.";
       } else if (botPairs > humanPairs) {
-        msg = "В этот раз бот набрал больше пар. Следующий уровень даст новый шанс.";
+        msg = "В этот раз партнер набрал больше пар. Следующий уровень даст новый шанс.";
       } else {
         msg = "Ничья по парам — редкий и достойный исход.";
       }
-      winTitle.textContent = "Уровень " + level + ": " + (humanPairs > botPairs ? "ваша победа" : botPairs > humanPairs ? "победа бота" : "ничья");
+      winTitle.textContent = "Уровень " + level + ": " + (humanPairs > botPairs ? "ваша победа" : botPairs > humanPairs ? "победа партнера" : "ничья");
       winLead.textContent = msg;
     }
     winTime.textContent = formatTime(seconds);
@@ -707,7 +707,7 @@
     setTurnUi();
     hintEl.textContent =
       gameMode === "bot"
-        ? "Режим с ботом: кто соберёт больше пар на этом уровне. Ходите по очереди после промаха."
+        ? "Режим в паре: кто соберёт больше пар на этом уровне. Ходите по очереди после промаха."
         : "Переворачивайте карточки и соберите все пары.";
     const lim = timeLimitForLevel(level);
     if (lim !== null) {
